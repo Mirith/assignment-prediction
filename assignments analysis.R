@@ -20,4 +20,41 @@ setwd("~/LING 104/assignments 1")
 
 summary(x <- read.delim("assignments.csv"))
 
-# 
+table(x$ASSIGNMENT, x$SEX)
+# numbers look about even for lab_report
+# but a lot more females chose to do a oral_exam than males
+# and a lot more males chose to do a thesis than females
+# statistically significant? 
+
+# percentage of females v males doing an oral exam
+prop.table(table(x$ASSIGNMENT, x$SEX)[2,])
+# percentage of females v males doing a thesis
+prop.table(table(x$ASSIGNMENT, x$SEX)[3,])
+
+# both have the exact same numbers as above table because they all add up to 100...
+
+# more analysis
+
+table(x$ASSIGNMENT, x$REGION)
+# each group has a spike in numbers in a separate format
+
+# this is really verbose
+# simplify output by hour range?
+table(x$ASSIGNMENT, x$WORKHOURS)
+
+
+table(x$ASSIGNMENT, x$MISTAKES)
+# 0s appear in interesting places:
+# lab_report has 0s on outer edges
+# oral_exam has 0s toward the top
+# thesis has 0s at the very start
+# indicating a specific distribution of mistakes -- might still be coincidence
+# how to test this?
+
+# testing all factors at the same time... with glm or lm? dependent variable is categorical
+# so use glm (lm is for numeric?)
+
+attach(x)
+
+# this isn't right... ignores the rest of data... how to start out with all data? 
+summary(model.01 <- glm(ASSIGNMENT ~ SEX*REGION , data = x, family = binomial))
