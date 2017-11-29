@@ -20,3 +20,4 @@ setwd("~/LING 104/assignments 1")
 
 summary(x <- read.delim("assignments.csv"))
 
+# 
