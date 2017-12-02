@@ -33,6 +33,8 @@ prop.table(table(x$ASSIGNMENT, x$SEX)[3,])
 
 # both have the exact same numbers as above table because they all add up to 100...
 
+# GGPLOT
+
 # more analysis
 
 table(x$ASSIGNMENT, x$REGION)
@@ -56,5 +58,23 @@ table(x$ASSIGNMENT, x$MISTAKES)
 
 attach(x)
 
+# something about (asl;dkjsdflj; + as;dfjsalkd;fj + asldkfd)^3
 # this isn't right... ignores the rest of data... how to start out with all data? 
 summary(model.01 <- glm(ASSIGNMENT ~ SEX*REGION , data = x, family = binomial))
+
+
+# from 104_04a_linreg.r
+
+# model.01 <- lm(               # make model.01 a linear model modeling
+# RT ~                        # RT as a function of
+#    (FREQUENCY+FAMILIARITY+IMAGEABILITY+MEANINGFULNESS)^3, # all other vars & up to their 3-way interactions
+# data=x[complete.cases(x),]) # using the complete cases of x
+# summary(model.01)
+# note the problem with the NAs: there is only 1 data point with FAMILIARITY:hi and IMAGEABILITY:lo
+
+summary(model.01 <- glm(ASSIGNMENT ~ (SEX+REGION+ASSIGNMENT+WORKHOURS+MISTAKES)^5, 
+        data = x[complete.cases(x),], family = binomial))
+
+# did not converge -- is that okay? 
+# use binomial or something else for dependent variable?
+# ^5 or smaller number? 
