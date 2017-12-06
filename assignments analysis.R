@@ -21,7 +21,6 @@
 # change workhours simplifying (round)
 # 
 # explore data after dropping stuff visually
-# fix two errors -- differing length? 
 # change all numbers to ones that are from this assignment
 # rewrite the conclusion
 
@@ -149,8 +148,17 @@ table(ASSIGNMENT,    # cross-tabulate the actually produced constructions
 # V_DO_PRT       88       12
 # V_PRT_DO       28       72
 
+# from this file
+#              predictions.cat
+# ASSIGNMENT   lab_report oral_exam thesis
+# lab_report         97         0      3
+# oral_exam           0       100      0
+# thesis             21         0     79
+
 # accuracy:
 (97+100+79) / length(predictions.cat) # 0.92
+
+(72+88) / length(predictions.cat) # (tp+tn) / (tp+tn+fp+fn) = 0.8
 
 # replace with assignment numbers
 
@@ -182,13 +190,8 @@ predictions.validation.test <-          # make predictions.validation.test
             newdata=x[sampler=="test",], # applied only to the 101 test cases
             type="class")                # return the categorical class predictions
 
-# Error in Ops.factor(predictions.validation.test, CONSTRUCTION[sampler ==  : 
-# level sets of factors are different
-# In addition: Warning message:
-#    In is.na(e1) | is.na(e2) :
-#    longer object length is not a multiple of shorter object length
 sum(predictions.validation.test ==     # compute the number of cases where the prediction for the test data
-        CONSTRUCTION[sampler=="test"]) /   # is the same as what actually happened in the test data
+        ASSIGNMENT[sampler=="test"]) /   # is the same as what actually happened in the test data
     length(predictions.validation.test) # and divide that by the number of test predictions (for a %)
 # very similar to the accuracy of the whole data set
 
@@ -216,10 +219,7 @@ predictions.cat.pruned <- # make predictions.cat
     predict(cart.1.pruned, # the predictions for the data from cart.1.pruned
             type="class")  # the categorical class predictions
 
-
-# Error in table(CONSTRUCTION, predictions.cat.pruned) : 
-# all arguments must have the same length
-table(CONSTRUCTION,           # cross-tabulate the actually produced constructions
+table(ASSIGNMENT,           # cross-tabulate the actually produced constructions
       predictions.cat.pruned) # against the predictions from the pruned tree
 
 # change numbers for this assignment
@@ -235,10 +235,9 @@ table(CONSTRUCTION,           # cross-tabulate the actually produced constructio
 # F:
 2*((0.8409091*0.74)/(0.8409091+0.74)) # 2 * ((prec*recall)/(prec+recall)) = 0.787234
 
+# visual exploration? or numerical only?
 
-
-
-
+# new conclusion here: 
 
 
 if (FALSE)
