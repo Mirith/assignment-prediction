@@ -55,23 +55,20 @@ barplot(table(x$ASSIGNMENT, x$WORKHOURS), col = colors, legend =TRUE)
 # middle work hours correlated to lab report
 
 # simplifying workhours a little bit (by integer)
-sort(x$WORKHOURS)
-workhours.simple <- c()
+
+workhours.simple <- sort(trunc(x$WORKHOURS))
+wk <- c()
 
 for(num in 12:39)
 {
-    # appends the length of the vector of elements that are between num and num+1
-    # ie, the number of people who worked num to num + 1 hours
-    workhours.simple <- append(workhours.simple, 
-                               length(which(x$WORKHOURS >= num & 
-                                            x$WORKHOURS < num+1)))
+    wk <- append(wk, length(which(workhours.simple == num)))
 }
 
 # plotting simplified workhour data
-barplot(workhours.simple, 
+barplot(wk, 
         ylab = "people", 
-        xlab = "hours worked", 
-        names.arg = c(12:39), 
+        xlab = "hours worked",
+        names.arg = c(12:39),
         col = "dark blue")
 # weird gap from 22-24
 # probably won't be too problematic
@@ -156,20 +153,7 @@ table(ASSIGNMENT,    # cross-tabulate the actually produced constructions
 # thesis             21         0     79
 
 # accuracy:
-(97+100+79) / length(predictions.cat) # 0.92
-
-(72+88) / length(predictions.cat) # (tp+tn) / (tp+tn+fp+fn) = 0.8
-
-# replace with assignment numbers
-
-# precision:
-72/(72+12) # tp/(tp+fp) = 0.8571429
-
-# recall/sensitivity:
-72/(72+28) # tp/(tp+fn) = 0.72
-
-# F:
-2*((0.8571429*0.72)/(0.8571429+0.72)) # 2 * ((prec*recall)/(prec+recall)) = 0.7826087
+(97+100+79) / length(predictions.cat) # .92
 
 # determine the nature of the effect(s) graphically
 plot(cart.1)                        # plot the classification tree
@@ -195,10 +179,8 @@ sum(predictions.validation.test ==     # compute the number of cases where the p
     length(predictions.validation.test) # and divide that by the number of test predictions (for a %)
 # very similar to the accuracy of the whole data set
 
-
-
 # validation 2: can we, or do we need to, prune the tree?
-pruning <-                     # make pruning
+pruning <-                      # make pruning
     cv.tree(cart.1,             # the result of cross-validating the tree
             FUN=prune.misclass) # based on the number of misclassifications
 
@@ -218,26 +200,23 @@ text(cart.1.pruned, pretty=0, all=TRUE) # add labels to it
 predictions.cat.pruned <- # make predictions.cat
     predict(cart.1.pruned, # the predictions for the data from cart.1.pruned
             type="class")  # the categorical class predictions
-
 table(ASSIGNMENT,           # cross-tabulate the actually produced constructions
       predictions.cat.pruned) # against the predictions from the pruned tree
 
-# change numbers for this assignment
 # accuracy:
-(74+86) / length(predictions.cat) # (tp+tn) / (tp+tn+fp+fn) = 0.8
-
-# precision:
-74/(74+14) # tp/(tp+fp) = 0.8409091
-
-# recall/sensitivity:
-74/(74+26) # tp/(tp+fn) = 0.74
-
-# F:
-2*((0.8409091*0.74)/(0.8409091+0.74)) # 2 * ((prec*recall)/(prec+recall)) = 0.787234
+(74+86) / length(predictions.cat) # 0.5333333
+# so much worse? 
 
 # visual exploration? or numerical only?
 
 # new conclusion here: 
+
+
+
+
+
+
+
 
 
 if (FALSE)
@@ -300,3 +279,4 @@ if (FALSE)
 # REGIONmiddle eastern
     
 }
+
