@@ -18,10 +18,8 @@
 
 ####################################
 # to do list
-# change workhours simplifying (round)
 # 
 # explore data after dropping stuff visually
-# change all numbers to ones that are from this assignment
 # rewrite the conclusion
 
 rm(list=ls(all=TRUE)) # clear memory
@@ -139,31 +137,15 @@ predictions.cat <-      # make predictions.cat
 table(ASSIGNMENT,    # cross-tabulate the actually produced constructions
       predictions.cat) # against the predictions
 
-# from cart 2
-#               predictions.cat
-# CONSTRUCTION V_DO_PRT V_PRT_DO
-# V_DO_PRT       88       12
-# V_PRT_DO       28       72
-
-# from this file
-#              predictions.cat
-# ASSIGNMENT   lab_report oral_exam thesis
-# lab_report         97         0      3
-# oral_exam           0       100      0
-# thesis             21         0     79
-
 # accuracy:
-(97+100+79) / length(predictions.cat) # .92
+(97+100+79) / length(predictions.cat) 
+# .92 (main diagonal of previous table added up)
 
-# determine the nature of the effect(s) graphically
-plot(cart.1)                        # plot the classification tree
-    text(cart.1, pretty=5, all=TRUE) # add labels to it
-
+plot(cart.1)
+    text(cart.1, pretty=5, all=TRUE) 
 
 # validation 1: comparing classification to prediction accuracy
-sampler <- sample(            # make sampler the random ordering of
-    rep(c("training", "test"), # the words "training" and "test"
-        c(150, 50)))          # repeated 150 and 50 times respectively
+sampler <- sample(rep(c("training", "test"), c(225, 75)))
 
 cart.validation.training <-           # make cart.validation.training
     tree(formula(cart.1),              # a classification tree with the same formula as cart.1
@@ -177,7 +159,7 @@ predictions.validation.test <-          # make predictions.validation.test
 sum(predictions.validation.test ==     # compute the number of cases where the prediction for the test data
         ASSIGNMENT[sampler=="test"]) /   # is the same as what actually happened in the test data
     length(predictions.validation.test) # and divide that by the number of test predictions (for a %)
-# very similar to the accuracy of the whole data set
+# 0.8533333
 
 # validation 2: can we, or do we need to, prune the tree?
 pruning <-                      # make pruning
@@ -203,9 +185,16 @@ predictions.cat.pruned <- # make predictions.cat
 table(ASSIGNMENT,           # cross-tabulate the actually produced constructions
       predictions.cat.pruned) # against the predictions from the pruned tree
 
-# accuracy:
-(74+86) / length(predictions.cat) # 0.5333333
-# so much worse? 
+# accuracy calculated as above:
+(91+100+79) / length(predictions.cat) # 0.9
+# so a little bit worse
+# only change is in lab report -- lower accuracy
+
+# comparing first tree (since second one wasn't better) to default tree
+
+# make default tree...
+
+# what other standards can be used?
 
 # visual exploration? or numerical only?
 
