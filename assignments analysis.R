@@ -121,59 +121,58 @@ barplot(table(x$ASSIGNMENT, x$MISTAKES),
 attach(x)
 
 #' #Creating the tree
-#' CART because dependent variable has three levels and is categorical
 
 library(tree)
 set.seed(42)
 
 summary(cart.1 <- tree(ASSIGNMENT ~ SEX+REGION+WORKHOURS+MISTAKES))
 
-# copy pasted from CART 2
-predictions.num <- # make predictions.num
-    predict(cart.1)  # the predictions for the data from cart.1
-predictions.cat <-      # make predictions.cat
-    predict(cart.1,       # the predictions for the data from cart.1
-            type="class") # but this time the categorical class predictions
-table(ASSIGNMENT,    # cross-tabulate the actually produced constructions
-      predictions.cat) # against the predictions
+#' #Classification accuracy
+predictions.num <- predict(cart.1)  
+predictions.cat <- predict(cart.1, type = "class") 
+
+# actual versus prediction
+table(ASSIGNMENT, predictions.cat) 
 
 # accuracy:
-(97+100+79) / length(predictions.cat) 
+(97+100+79) / length(predictions.cat)
 # .92 (main diagonal of previous table added up)
 
 plot(cart.1)
     text(cart.1, pretty=5, all=TRUE) 
 
-# validation 1: comparing classification to prediction accuracy
+#' ##Making training/testing set
 sampler <- sample(rep(c("training", "test"), c(225, 75)))
 
-cart.validation.training <-           # make cart.validation.training
-    tree(formula(cart.1),              # a classification tree with the same formula as cart.1
-         data=x[sampler=="training",]) # but applied only to the 302 training cases
+# tree from training data
+cart.validation.training <- tree(formula(cart.1),              
+         data=x[sampler=="training",])
 
-predictions.validation.test <-          # make predictions.validation.test
-    predict(cart.validation.training,    # the predictions from cart.validation.training
-            newdata=x[sampler=="test",], # applied only to the 101 test cases
-            type="class")                # return the categorical class predictions
+# making predictions for test data based on training data
+predictions.validation.test <- predict(cart.validation.training, 
+            newdata=x[sampler=="test",], 
+            type="class")
 
-sum(predictions.validation.test ==     # compute the number of cases where the prediction for the test data
-        ASSIGNMENT[sampler=="test"]) /   # is the same as what actually happened in the test data
-    length(predictions.validation.test) # and divide that by the number of test predictions (for a %)
-# 0.8533333
+# percentage of times the predictions matched the actual data
+sum(predictions.validation.test ==     
+        ASSIGNMENT[sampler=="test"]) /   
+    length(predictions.validation.test) 
+# 0.8533333 -- which is pretty high
 
-# validation 2: can we, or do we need to, prune the tree?
-pruning <-                      # make pruning
-    cv.tree(cart.1,             # the result of cross-validating the tree
-            FUN=prune.misclass) # based on the number of misclassifications
+#' #Pruning (if necessary)
+
+# based on number of misclassifications
+pruning <- cv.tree(cart.1, FUN = prune.misclass)
 
 plot(pruning$size,     # plot the pruned tree sizes
      pruning$dev,      # against the deviances those tree sizes come with
      type="b"); grid() # using points and lines; add a grid
-# the deviances are lowest for 2 and 5 nodes, we pick 5 (because 2 uses only DO_LENGTH_SYLL)
+# the deviances are lowest for 5 and 8 nodes
+# but 8 is the same tree...
+# so using 5
 
-cart.1.pruned <-         # make cart.1.pruned
-    prune.misclass(cart.1, # a version of cart.1 pruned down to
-                   best=5) # only 5 terminal nodes
+# pruned to 5 terminal nodes
+cart.1.pruned <- prune.misclass(cart.1, best=5) 
 
 plot(cart.1.pruned)                        # plot the classification tree
 text(cart.1.pruned, pretty=0, all=TRUE) # add labels to it
@@ -187,10 +186,8 @@ table(ASSIGNMENT,           # cross-tabulate the actually produced constructions
 
 # accuracy calculated as above:
 (91+100+79) / length(predictions.cat) # 0.9
-# so a little bit worse
-# only change is in lab report -- lower accuracy
-
-# comparing first tree (since second one wasn't better) to default tree
+# so a teeny tiny bit worse (loses .02 accuracy...)
+# but far less complicated, so probably better
 
 # make default tree...
 
