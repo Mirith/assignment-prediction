@@ -4,23 +4,17 @@
 
 #' Information from 104_datafiles.pdf about variables:  
 
-#' ASSIGNMENT: the dependent variable, the final assignment chosen by a student:  
+#' **ASSIGNMENT**: the dependent variable, the final assignment chosen by a student:  
 #'     oral_exam vs. lab_report vs. thesis  
-#' SEX: the sex of the student: female vs. male  
-#' REGION: the geographical region of origin of the student:  
+#' **SEX**: the sex of the student: female vs. male  
+#' **REGION**: the geographical region of origin of the student:  
 #'     central_european vs. hispanic vs. middle_eastern  
-#' WORKHOURS: the number of hours students self-report they invested into the course  
-#' MISTAKES: the number of mistakes in the last test before choosing the assignment
+#' **WORKHOURS**: the number of hours students self-report they invested into the course  
+#' **MISTAKES**: the number of mistakes in the last test before choosing the assignment
 
 #' Overall question:  
 
 #' Which independent variable(s) affect the assignment choice? 
-
-####################################
-# to do list
-# 
-# explore data after dropping stuff visually
-# rewrite the conclusion
 
 rm(list=ls(all=TRUE)) # clear memory
 
@@ -28,6 +22,7 @@ rm(list=ls(all=TRUE)) # clear memory
 #' works for local machine, will have to change for others' though
 setwd("~/LING 104/assignments 1") 
 
+#' for making the trees later
 library(tree)
 set.seed(42)
 
@@ -48,28 +43,17 @@ barplot(table(x$ASSIGNMENT), col = colors) # pretty equally divided
 
 #' #Workhours
 
-# x$WORKHOURS is really messy...
+# as is, x$WORKHOURS is really messy...
 
 # plotting against assignment shows a general trend
 barplot(table(x$ASSIGNMENT, x$WORKHOURS), col = colors, legend =TRUE)
 # lower work hours correlated to oral exams, while high workhours to thesis
 # middle work hours correlated to lab report
 
-# simplifying workhours a little bit (by integer)
-
-workhours.simple <- sort(trunc(x$WORKHOURS))
-wk <- c()
-
-for(num in 12:39)
-{
-    wk <- append(wk, length(which(workhours.simple == num)))
-}
-
-# plotting simplified workhour data
-barplot(wk, 
+# plotting simplified (by integer, not exact decimal) workhour data
+barplot(table(factor(round(x$WORKHOURS), levels=12:39)), 
         ylab = "people", 
         xlab = "hours worked",
-        names.arg = c(12:39),
         col = "dark blue")
 #' weird gap from 22-24?
 #' maybe two separate distributions
