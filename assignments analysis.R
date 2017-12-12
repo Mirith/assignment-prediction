@@ -10,7 +10,7 @@
 #' REGION: the geographical region of origin of the student:  
 #'     central_european vs. hispanic vs. middle_eastern  
 #' WORKHOURS: the number of hours students self-report they invested into the course  
-#' MISTAKES: the number of mistakes in the last test before choosing the assignment    
+#' MISTAKES: the number of mistakes in the last test before choosing the assignment
 
 #' Overall question:  
 
@@ -27,6 +27,9 @@ rm(list=ls(all=TRUE)) # clear memory
 #' setting the working directory, ie where data is  
 #' works for local machine, will have to change for others' though
 setwd("~/LING 104/assignments 1") 
+
+library(tree)
+set.seed(42)
 
 #' #Preliminary analysis of data
 
@@ -68,9 +71,9 @@ barplot(wk,
         xlab = "hours worked",
         names.arg = c(12:39),
         col = "dark blue")
-# weird gap from 22-24
-# probably won't be too problematic
-# sort of peaks around 32
+#' weird gap from 22-24?
+#' maybe two separate distributions
+#' shows something outside may be influencing it
 
 #' ##Sex v Assignment
 table(x$ASSIGNMENT, x$SEX)
@@ -122,26 +125,25 @@ attach(x)
 
 #' #Creating the tree
 
-library(tree)
-set.seed(42)
-
 summary(cart.1 <- tree(ASSIGNMENT ~ SEX+REGION+WORKHOURS+MISTAKES))
 
 #' #Classification accuracy
 predictions.num <- predict(cart.1)  
 predictions.cat <- predict(cart.1, type = "class") 
 
+# this is really messy
+plot(cart.1)
+    text(cart.1, pretty=1, all=TRUE) 
+
 # actual versus prediction
 table(ASSIGNMENT, predictions.cat) 
 
 # accuracy:
 (97+100+79) / length(predictions.cat)
-# .92 (main diagonal of previous table added up)
+# main diagonal of previous table added up
+# accuracy looks pretty good
 
-plot(cart.1)
-    text(cart.1, pretty=5, all=TRUE) 
-
-#' ##Making training/testing set
+#' ##Making training/testing set to apply to data
 sampler <- sample(rep(c("training", "test"), c(225, 75)))
 
 # tree from training data
@@ -157,112 +159,55 @@ predictions.validation.test <- predict(cart.validation.training,
 sum(predictions.validation.test ==     
         ASSIGNMENT[sampler=="test"]) /   
     length(predictions.validation.test) 
-# 0.8533333 -- which is pretty high
+# seems good
 
 #' #Pruning (if necessary)
 
 # based on number of misclassifications
 pruning <- cv.tree(cart.1, FUN = prune.misclass)
 
-plot(pruning$size,     # plot the pruned tree sizes
-     pruning$dev,      # against the deviances those tree sizes come with
-     type="b"); grid() # using points and lines; add a grid
-# the deviances are lowest for 5 and 8 nodes
-# but 8 is the same tree...
-# so using 5
+plot(pruning$size, pruning$dev, type="b"); grid()
+#' The deviances are lowest for 5 and 8 nodes
+#' but 8 is the same tree... so using the tree with 5 nodes
 
 # pruned to 5 terminal nodes
 cart.1.pruned <- prune.misclass(cart.1, best=5) 
 
-plot(cart.1.pruned)                        # plot the classification tree
-text(cart.1.pruned, pretty=0, all=TRUE) # add labels to it
+# still really messy
+# plot the new, pruned tree
+plot(cart.1.pruned)
+    text(cart.1.pruned, pretty=1, all=TRUE) 
 
-# but does it do worse?
-predictions.cat.pruned <- # make predictions.cat
-    predict(cart.1.pruned, # the predictions for the data from cart.1.pruned
-            type="class")  # the categorical class predictions
-table(ASSIGNMENT,           # cross-tabulate the actually produced constructions
-      predictions.cat.pruned) # against the predictions from the pruned tree
+# new tree's performance
+predictions.cat.pruned <- predict(cart.1.pruned, type="class") 
 
-# accuracy calculated as above:
-(91+100+79) / length(predictions.cat) # 0.9
+# testing new accuracy
+table(ASSIGNMENT, predictions.cat.pruned) 
+
+# accuracy calculated as above
+(91+100+79) / length(predictions.cat)
 # so a teeny tiny bit worse (loses .02 accuracy...)
 # but far less complicated, so probably better
 
-# make default tree...
+#' ##Testing with subsets of data
 
-# what other standards can be used?
+# same training data as earlier and the pruned tree
+cart.validation.training.1 <- tree(formula(cart.1.pruned), 
+                                   data=x[sampler=="training",])
 
-# visual exploration? or numerical only?
+# making predictions for test data based on training data
+predictions.validation.test.1 <- predict(cart.validation.training.1, 
+                                       newdata=x[sampler=="test",], 
+                                       type="class")
 
-# new conclusion here: 
+sum(predictions.validation.test.1 ==     
+        ASSIGNMENT[sampler=="test"]) /   
+    length(predictions.validation.test.1) 
+# same data, gives same result 0.8533333
+# so this tree doesn't give up performance when it becomes simpler
+# this is good
 
-
-
-
-
-
-
-
-
-if (FALSE)
-{
-    # using a glm as the dependent variable is categorical
-    summary(model.01 <- glm(ASSIGNMENT ~ (SEX+REGION+WORKHOURS+MISTAKES)^3, 
-                            data = x, 
-                            family = binomial))
-    
-    drop1(model.01, test="Chisq") # p-value of the droppable predictor(s)
-    # using Chisq because it's a glm
-    
-    # dropping the predictor with highest pvalue/least significance
-    summary(model.02 <- update(model.01, ~. - SEX:REGION:MISTAKES))
-    drop1(model.02, test="Chisq")
-    
-    summary(model.03 <- update(model.02, ~. - SEX:WORKHOURS:MISTAKES))
-    drop1(model.03, test="Chisq")
-    
-    summary(model.04 <- update(model.03, ~. - SEX:REGION:WORKHOURS))
-    drop1(model.04, test="Chisq")
-    
-    # now some things are significant!
-    # continuing to drop predictors that do not contribute
-    
-    summary(model.05 <- update(model.04, ~. - REGION:WORKHOURS:MISTAKES))
-    drop1(model.05, test="Chisq")
-    
-    summary(model.06 <- update(model.05, ~. - SEX:MISTAKES))
-    drop1(model.06, test="Chisq")
-    
-    summary(model.07 <- update(model.06, ~. - REGION:MISTAKES))
-    drop1(model.07, test="Chisq")
-    
-    # Everything is now significant
-    
-    #' #Exploring the model 
-    
-    # significance test for model
-    # comparing it to a null model, ie one with no predictors
-    # p-value of 2.2e-16, ie significant
-    anova(model.06,
-          glm(ASSIGNMENT ~ 1,
-              data=x,
-              family=binomial),
-          test="Chisq") 
-    
-    rms::lrm(formula(model.06))$stats[c("C", "R2")]
-    # model.07 is only 0.5647909 -- that's pretty low
-    # (model.06 r squared with mistakes is 0.5776149, slightly higher)
-
-# summarizing everything #######################################################
-# model.07 is significant (p-value of 2.2e-16) but has a low R-squared (about .565)
-# value, indicating that the connection between the assignment chosen and 
-# a number of independent variables is significant but noisy. 
-# model.06 includes interactions between
-# SEXmale:REGIONhispanic, SEXmale:REGIONmiddle eastern, SEXmale:WORKHOURS, 
-# REGIONhispanic:WORKHOURS, REGIONmiddle eastern:WORKHOURS, WORKHOURS:MISTAKES  
-# and the variablesSEXmale, WORKHOURS, MISTAKES, REGIONhispanic, 
-# REGIONmiddle eastern
-    
-}
-
+#' ##Conclusion
+#' This dataset was effectively modeled by a CART (Classification and Regression Tree).  Both the original and the pruned model have high accuracy (.92 and .90 respectively) and do well (about .853 accuracy) when working with training and testing data subsets.  
+#' The tree shows that students who worked less hours (specifically less than 23.4 hours) chose to do oral exams, whereas students who worked the most hours (specifically more than 35.05) chose to do theses, unless they were from the Central European or Middle Eastern regions.  Students who put in the middle range of workhours chose to do lab reports.  
+#' Workhours seems to be a very influential predictor, as it shows up at three of the branches in the pruned tree.  The one other branch has region as a predictor.  Factors like gender and mistakes had, if any, negligible effect on predictions, as they do not show up in the tree.  
