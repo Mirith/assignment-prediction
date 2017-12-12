@@ -10,7 +10,7 @@
 #' **REGION**: the geographical region of origin of the student:  
 #'     central_european vs. hispanic vs. middle_eastern  
 #' **WORKHOURS**: the number of hours students self-report they invested into the course  
-#' **MISTAKES**: the number of mistakes in the last test before choosing the assignment
+#' **MISTAKES**: the number of mistakes in the last test before choosing the assignment  
 
 #' Overall question:  
 
@@ -33,11 +33,16 @@ summary(x <- read.delim("assignments.csv"))
 # to make things easier to see in plots
 colors <- c("dark blue", "dark green", "red")
 
-barplot(table(x$MISTAKES), col = "dark blue") # looks like a pretty normal distribution of mistakes
+barplot(table(x$MISTAKES), 
+        main = "Mistakes",
+        ylab = "persons making mistakes", 
+        xlab = "number of mistakes", 
+        col = "dark blue") 
+# looks like a pretty normal distribution of mistakes
 
-barplot(table(x$SEX), col = colors) # about half and half
+barplot(table(x$SEX), legend = TRUE, col = colors) # about half and half
 
-barplot(table(x$ASSIGNMENT), col = colors) # pretty equally divided
+barplot(table(x$ASSIGNMENT), legend = TRUE, col = colors) # pretty equally divided
 
 # so far nothing looks weird/particularly influential
 
@@ -46,7 +51,12 @@ barplot(table(x$ASSIGNMENT), col = colors) # pretty equally divided
 # as is, x$WORKHOURS is really messy...
 
 # plotting against assignment shows a general trend
-barplot(table(x$ASSIGNMENT, x$WORKHOURS), col = colors, legend =TRUE)
+barplot(table(x$ASSIGNMENT, 
+              x$WORKHOURS), 
+        ylab = "people working",
+        xlab = "workhours",
+        col = colors, 
+        legend =TRUE)
 # lower work hours correlated to oral exams, while high workhours to thesis
 # middle work hours correlated to lab report
 
@@ -55,9 +65,7 @@ barplot(table(factor(round(x$WORKHOURS), levels=12:39)),
         ylab = "people", 
         xlab = "hours worked",
         col = "dark blue")
-#' weird gap from 22-24?
-#' maybe two separate distributions
-#' shows something outside may be influencing it
+#' Weird gap from 22-24?  May be two separate distributions.  
 
 #' ##Sex v Assignment
 table(x$ASSIGNMENT, x$SEX)
@@ -79,17 +87,17 @@ barplot(prop.table(table(x$REGION, x$ASSIGNMENT)[1,]),
         legend.text = TRUE, 
         col = colors, 
         main = "Central European",
-        ylab = "percentage") 
+        ylab = "percentage that chose") 
 barplot(prop.table(table(x$REGION, x$ASSIGNMENT)[2,]), 
         legend.text = TRUE, 
         col = colors, 
         main = "Hispanic",
-        ylab = "percentage") 
+        ylab = "percentage that chose") 
 barplot(prop.table(table(x$REGION, x$ASSIGNMENT)[3,]), 
         legend.text = TRUE, 
         col = colors, 
         main = "Middle Eastern",
-        ylab = "percentage") 
+        ylab = "percentage that chose") 
 
 # each group has a spike in numbers in a separate format
 # ie, oral exam for CE, thesis for H, and lab report for ME
@@ -100,6 +108,8 @@ table(x$ASSIGNMENT, x$MISTAKES)
 # easier to see with a plot
 barplot(table(x$ASSIGNMENT, x$MISTAKES), 
         legend.text = TRUE, 
+        ylab = "number of people",
+        xlab = "number of mistakes",
         col = colors)
 # shows the distribution of colors/assignment types over number of mistakes made
 
@@ -115,9 +125,11 @@ summary(cart.1 <- tree(ASSIGNMENT ~ SEX+REGION+WORKHOURS+MISTAKES))
 predictions.num <- predict(cart.1)  
 predictions.cat <- predict(cart.1, type = "class") 
 
-# this is really messy
+# this is really, really messy
 plot(cart.1)
     text(cart.1, pretty=1, all=TRUE) 
+# but first three nodes from the top all involve workhours, probably important
+# harder to see all the terminal nodes, hopefully it can be simplified later
 
 # actual versus prediction
 table(ASSIGNMENT, predictions.cat) 
