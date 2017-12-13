@@ -121,16 +121,15 @@ attach(x)
 
 summary(cart.1 <- tree(ASSIGNMENT ~ SEX+REGION+WORKHOURS+MISTAKES))
 
+#' #Classification accuracy
+predictions.num <- predict(cart.1)  
+predictions.cat <- predict(cart.1, type = "class") 
+
 # this is really, really messy
 plot(cart.1)
     text(cart.1, pretty=1, all=TRUE) 
 # but first three nodes from the top all involve workhours, probably important
 # harder to see all the terminal nodes, hopefully it can be simplified later
-
-    
-#' #Classification accuracy
-predictions.num <- predict(cart.1)  
-predictions.cat <- predict(cart.1, type = "class") 
 
 # actual versus prediction
 table(ASSIGNMENT, predictions.cat) 
