@@ -3,6 +3,4 @@ A class project that determines which assignment a student will choose given a n
 
 This uses a dataset provided by my professor called assignments.csv. 
 
-The html report can be used to view the code and whatever outputs it is supposed to give with the dataset.  
-
-Still in progress, mostly done though.  
+The html report can be used to view the code and whatever outputs it is supposed to give with the dataset, as well as some graphs.  
